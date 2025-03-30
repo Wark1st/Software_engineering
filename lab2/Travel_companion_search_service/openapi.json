@@ -1,0 +1,948 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "FastAPI",
+      "version": "0.1.0"
+    },
+    "paths": {
+      "/users/register": {
+        "post": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Register User",
+          "operationId": "register_user_users_register_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/users/token": {
+        "post": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Login For Access Token",
+          "operationId": "login_for_access_token_users_token_post",
+          "requestBody": {
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "$ref": "#/components/schemas/Body_login_for_access_token_users_token_post"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Token"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/users/me": {
+        "get": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Read Users Me",
+          "operationId": "read_users_me_users_me_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/users/get_user": {
+        "get": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Get User By Login",
+          "operationId": "get_user_by_login_users_get_user_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "login",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Login"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/users/": {
+        "get": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Get User By Login",
+          "operationId": "get_user_by_login_users__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "type": "array",
+                    "title": "Response Get User By Login Users  Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/points/create_point": {
+        "post": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Create New Point",
+          "operationId": "create_new_point_points_create_point_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointCreate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Point"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/points/get_point": {
+        "get": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Get Point By Name",
+          "operationId": "get_point_by_name_points_get_point_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "pointName",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Pointname"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Point"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/points/": {
+        "get": {
+          "tags": [
+            "points"
+          ],
+          "summary": "Get All Points",
+          "operationId": "get_all_points_points__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/routes/create_route": {
+        "post": {
+          "tags": [
+            "routes"
+          ],
+          "summary": "Create New Route",
+          "operationId": "create_new_route_routes_create_route_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteCreate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/routes/": {
+        "get": {
+          "tags": [
+            "routes"
+          ],
+          "summary": "Get All Routes",
+          "operationId": "get_all_routes_routes__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/routes/get_route": {
+        "get": {
+          "tags": [
+            "routes"
+          ],
+          "summary": "Get Route By Id",
+          "operationId": "get_route_by_id_routes_get_route_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/trips/create_trip": {
+        "post": {
+          "tags": [
+            "trips"
+          ],
+          "summary": "Create New Trip",
+          "operationId": "create_new_trip_trips_create_trip_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripCreate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/trips/get_trip": {
+        "get": {
+          "tags": [
+            "trips"
+          ],
+          "summary": "Get Trip By Id",
+          "operationId": "get_trip_by_id_trips_get_trip_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "trip_id",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Trip Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/trips/": {
+        "get": {
+          "tags": [
+            "trips"
+          ],
+          "summary": "Get All Trips",
+          "operationId": "get_all_trips_trips__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/trips/add_user": {
+        "put": {
+          "tags": [
+            "trips"
+          ],
+          "summary": "Add User To Trip By Userid And Tripid",
+          "operationId": "add_user_to_trip_by_userId_and_tripId_trips_add_user_put",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "userId",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Userid"
+              }
+            },
+            {
+              "name": "tripId",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Tripid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/trips/delete_trip": {
+        "delete": {
+          "tags": [
+            "trips"
+          ],
+          "summary": "Delete Trip By Id",
+          "operationId": "delete_trip_by_id_trips_delete_trip_delete",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "tripId",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Tripid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Body_login_for_access_token_users_token_post": {
+          "properties": {
+            "grant_type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^password$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grant Type"
+            },
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            },
+            "scope": {
+              "type": "string",
+              "title": "Scope",
+              "default": ""
+            },
+            "client_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Id"
+            },
+            "client_secret": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Secret"
+            }
+          },
+          "type": "object",
+          "required": [
+            "username",
+            "password"
+          ],
+          "title": "Body_login_for_access_token_users_token_post"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "Point": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "pointName": {
+              "type": "string",
+              "title": "Pointname"
+            },
+            "px": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "title": "Px"
+            },
+            "py": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "title": "Py"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "pointName",
+            "px",
+            "py"
+          ],
+          "title": "Point"
+        },
+        "PointCreate": {
+          "properties": {
+            "pointName": {
+              "type": "string",
+              "title": "Pointname"
+            },
+            "px": {
+              "type": "number",
+              "maximum": 90,
+              "minimum": -90,
+              "title": "Px"
+            },
+            "py": {
+              "type": "number",
+              "maximum": 180,
+              "minimum": -180,
+              "title": "Py"
+            }
+          },
+          "type": "object",
+          "required": [
+            "pointName",
+            "px",
+            "py"
+          ],
+          "title": "PointCreate"
+        },
+        "RouteCreate": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "points": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array",
+              "title": "Points"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "default": ""
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "points"
+          ],
+          "title": "RouteCreate"
+        },
+        "Token": {
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "title": "Access Token"
+            },
+            "token_type": {
+              "type": "string",
+              "title": "Token Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "access_token",
+            "token_type"
+          ],
+          "title": "Token"
+        },
+        "TripCreate": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description",
+              "default": ""
+            },
+            "start_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Start At"
+            },
+            "maxUsers": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Maxusers"
+            },
+            "route_id": {
+              "type": "integer",
+              "title": "Route Id"
+            },
+            "users": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array",
+              "title": "Users"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "start_at",
+            "maxUsers",
+            "route_id",
+            "users"
+          ],
+          "title": "TripCreate"
+        },
+        "User": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "username",
+            "email"
+          ],
+          "title": "User"
+        },
+        "UserCreate": {
+          "properties": {
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            }
+          },
+          "type": "object",
+          "required": [
+            "username",
+            "email",
+            "password"
+          ],
+          "title": "UserCreate"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      },
+      "securitySchemes": {
+        "OAuth2PasswordBearer": {
+          "type": "oauth2",
+          "flows": {
+            "password": {
+              "scopes": {},
+              "tokenUrl": "token"
+            }
+          }
+        }
+      }
+    }
+  }

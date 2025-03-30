@@ -1,0 +1,353 @@
+{
+  "configuration" : { },
+  "description" : "Description",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2025-03-30T14:23:56Z",
+  "model" : {
+    "people" : [ {
+      "description" : "Присоединяется к поездке",
+      "id" : "1",
+      "location" : "Unspecified",
+      "name" : "Пассажир",
+      "properties" : {
+        "structurizr.dsl.identifier" : "passenger"
+      },
+      "relationships" : [ {
+        "description" : "Добавляется в поездку",
+        "destinationId" : "3",
+        "id" : "23",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Получает услугу записи в поездку",
+        "destinationId" : "16",
+        "id" : "24",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Person,c1,c2"
+    }, {
+      "description" : "Создает поездку и маршрут",
+      "id" : "2",
+      "location" : "Unspecified",
+      "name" : "Водитель",
+      "properties" : {
+        "structurizr.dsl.identifier" : "driver"
+      },
+      "relationships" : [ {
+        "description" : "Создает маршрут и поездку, может добавить в нее пассажиров",
+        "destinationId" : "3",
+        "id" : "21",
+        "sourceId" : "2",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Получает услуги связанные с созданием поезкок",
+        "destinationId" : "16",
+        "id" : "22",
+        "sourceId" : "2",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Person,c1,c2"
+    } ],
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "description" : "Хранит схему данных маршрутов, поездок, точек в марщруте и пользователей в поездке",
+        "documentation" : { },
+        "id" : "4",
+        "name" : "База данных API поездок",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.companion_search_api_db"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "NoSQL Database"
+      }, {
+        "description" : "Хранит схему данных логинов и паролей",
+        "documentation" : { },
+        "id" : "5",
+        "name" : "База данных API аутентификации",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.auth_api_db"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "PostgreSQL Database"
+      }, {
+        "description" : "Хранит схему данных географических координат",
+        "documentation" : { },
+        "id" : "6",
+        "name" : "База данных API географических координат",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.geo_points_api_db"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "PostgreSQL Database"
+      }, {
+        "description" : "Хранит схему данных информации о пользователях",
+        "documentation" : { },
+        "id" : "7",
+        "name" : "База данных API пользователей",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.users_api_db"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "PostgreSQL Database"
+      }, {
+        "description" : "Реализует функциональность сервиса регистрации и валидации токенов",
+        "documentation" : { },
+        "id" : "8",
+        "name" : "API аутентификации",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.auth_api"
+        },
+        "relationships" : [ {
+          "description" : "Получает данные из запроса и сохраняет и получает данные о логине и пароле пользователе",
+          "destinationId" : "5",
+          "id" : "9",
+          "sourceId" : "8",
+          "tags" : "Relationship",
+          "technology" : "SQL/TCP"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python FastAPI"
+      }, {
+        "description" : "Реализует функциональность сервиса записи и получения информации о пользователях",
+        "documentation" : { },
+        "id" : "10",
+        "name" : "API пользователей",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.users_api"
+        },
+        "relationships" : [ {
+          "description" : "Получает данные из запроса и сохраняет и получает данные о пользователе",
+          "destinationId" : "7",
+          "id" : "11",
+          "sourceId" : "10",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Валидирует токен",
+          "destinationId" : "8",
+          "id" : "12",
+          "sourceId" : "10",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python FastAPI"
+      }, {
+        "description" : "Реализует функциональность сервиса добавления, удаления и запроса данных о географических коодинатах",
+        "documentation" : { },
+        "id" : "13",
+        "name" : "API географических координат",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.geo_points_api"
+        },
+        "relationships" : [ {
+          "description" : "Получает данные из запроса и сохраняет и получает данные о точке",
+          "destinationId" : "6",
+          "id" : "14",
+          "sourceId" : "13",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Валидирует токен",
+          "destinationId" : "8",
+          "id" : "15",
+          "sourceId" : "13",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python FastAPI"
+      }, {
+        "description" : "Реализует функциональность сервиса по созданию маршрутов, добавления в них точек, создание поездок и добавления людей",
+        "documentation" : { },
+        "id" : "16",
+        "name" : "API поездок",
+        "properties" : {
+          "structurizr.dsl.identifier" : "companion_search.companion_search_api"
+        },
+        "relationships" : [ {
+          "description" : "Получает данные из запроса и сохраняет данные о поездке, маршруте",
+          "destinationId" : "4",
+          "id" : "17",
+          "sourceId" : "16",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Валидирует токен",
+          "destinationId" : "8",
+          "id" : "18",
+          "sourceId" : "16",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        }, {
+          "description" : "Запрашивает данные пользователя",
+          "destinationId" : "10",
+          "id" : "19",
+          "sourceId" : "16",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        }, {
+          "description" : "Запрашивает данные географической точки",
+          "destinationId" : "13",
+          "id" : "20",
+          "sourceId" : "16",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python FastAPI"
+      } ],
+      "description" : "Сервис, позволяющий зарегистрироваться в сервисе, создать точки маршрута, добавить их в маршрут и создать поездку с добавлением в нее пользователей",
+      "documentation" : { },
+      "id" : "3",
+      "location" : "Unspecified",
+      "name" : "Сервис поиска попутчиков",
+      "properties" : {
+        "structurizr.dsl.identifier" : "companion_search"
+      },
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "Travel companion search service",
+  "properties" : {
+    "structurizr.dsl" : "d29ya3NwYWNlIHsKICAgIG5hbWUgIlRyYXZlbCBjb21wYW5pb24gc2VhcmNoIHNlcnZpY2UiCiAgICAhaWRlbnRpZmllcnMgaGllcmFyY2hpY2FsCgogICAgbW9kZWwgewogICAgICAgIHBhc3NlbmdlciA9IHBlcnNvbiAi0J/QsNGB0YHQsNC20LjRgCIgItCf0YDQuNGB0L7QtdC00LjQvdGP0LXRgtGB0Y8g0Log0L/QvtC10LfQtNC60LUiICJjMSxjMiIKCiAgICAgICAgZHJpdmVyID0gcGVyc29uICLQktC+0LTQuNGC0LXQu9GMIiAi0KHQvtC30LTQsNC10YIg0L/QvtC10LfQtNC60YMg0Lgg0LzQsNGA0YjRgNGD0YIiImMxLGMyIgoKICAgICAgICBjb21wYW5pb25fc2VhcmNoID0gc29mdHdhcmVTeXN0ZW0gItCh0LXRgNCy0LjRgSDQv9C+0LjRgdC60LAg0L/QvtC/0YPRgtGH0LjQutC+0LIiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gItCh0LXRgNCy0LjRgSwg0L/QvtC30LLQvtC70Y/RjtGJ0LjQuSDQt9Cw0YDQtdCz0LjRgdGC0YDQuNGA0L7QstCw0YLRjNGB0Y8g0LIg0YHQtdGA0LLQuNGB0LUsINGB0L7Qt9C00LDRgtGMINGC0L7Rh9C60Lgg0LzQsNGA0YjRgNGD0YLQsCwg0LTQvtCx0LDQstC40YLRjCDQuNGFINCyINC80LDRgNGI0YDRg9GCINC4INGB0L7Qt9C00LDRgtGMINC/0L7QtdC30LTQutGDINGBINC00L7QsdCw0LLQu9C10L3QuNC10Lwg0LIg0L3QtdC1INC/0L7Qu9GM0LfQvtCy0LDRgtC10LvQtdC5IgogICAgICAgIAogICAgICAgICAgICAKICAgICAgICAgICAgCiAgICAgICAgICAgIGNvbXBhbmlvbl9zZWFyY2hfQVBJX2RiID0gY29udGFpbmVyICLQkdCw0LfQsCDQtNCw0L3QvdGL0YUgQVBJINC/0L7QtdC30LTQvtC6IiB7CiAgICAgICAgICAgICAgICB0YWdzICJEYXRhYmFzZSIKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIk5vU1FMIERhdGFiYXNlIgoKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICLQpdGA0LDQvdC40YIg0YHRhdC10LzRgyDQtNCw0L3QvdGL0YUg0LzQsNGA0YjRgNGD0YLQvtCyLCDQv9C+0LXQt9C00L7Quiwg0YLQvtGH0LXQuiDQsiDQvNCw0YDRidGA0YPRgtC1INC4INC/0L7Qu9GM0LfQvtCy0LDRgtC10LvQtdC5INCyINC/0L7QtdC30LTQutC1IgogICAgICAgICAgICB9CgogICAgICAgICAgICBhdXRoX0FQSV9kYiA9IGNvbnRhaW5lciAi0JHQsNC30LAg0LTQsNC90L3Ri9GFIEFQSSDQsNGD0YLQtdC90YLQuNGE0LjQutCw0YbQuNC4IiB7CiAgICAgICAgICAgICAgICB0YWdzICJEYXRhYmFzZSIKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlBvc3RncmVTUUwgRGF0YWJhc2UiCgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gItCl0YDQsNC90LjRgiDRgdGF0LXQvNGDINC00LDQvdC90YvRhSDQu9C+0LPQuNC90L7QsiDQuCDQv9Cw0YDQvtC70LXQuSIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZ2VvX3BvaW50c19BUElfZGIgPSBjb250YWluZXIgItCR0LDQt9CwINC00LDQvdC90YvRhSBBUEkg0LPQtdC+0LPRgNCw0YTQuNGH0LXRgdC60LjRhSDQutC+0L7RgNC00LjQvdCw0YIiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkRhdGFiYXNlIgogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUG9zdGdyZVNRTCBEYXRhYmFzZSIKCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAi0KXRgNCw0L3QuNGCINGB0YXQtdC80YMg0LTQsNC90L3Ri9GFINCz0LXQvtCz0YDQsNGE0LjRh9C10YHQutC40YUg0LrQvtC+0YDQtNC40L3QsNGCIgogICAgICAgICAgICB9CgogICAgICAgICAgICB1c2Vyc19BUElfZGIgPSBjb250YWluZXIgItCR0LDQt9CwINC00LDQvdC90YvRhSBBUEkg0L/QvtC70YzQt9C+0LLQsNGC0LXQu9C10LkiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIkRhdGFiYXNlIgogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUG9zdGdyZVNRTCBEYXRhYmFzZSIKCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAi0KXRgNCw0L3QuNGCINGB0YXQtdC80YMg0LTQsNC90L3Ri9GFINC40L3RhNC+0YDQvNCw0YbQuNC4INC+INC/0L7Qu9GM0LfQvtCy0LDRgtC10LvRj9GFIgogICAgICAgICAgICB9CgogICAgICAgICAgICBhdXRoX0FQSSA9IGNvbnRhaW5lciAiQVBJINCw0YPRgtC10L3RgtC40YTQuNC60LDRhtC40LgiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIiIKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlB5dGhvbiBGYXN0QVBJIgoKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICLQoNC10LDQu9C40LfRg9C10YIg0YTRg9C90LrRhtC40L7QvdCw0LvRjNC90L7RgdGC0Ywg0YHQtdGA0LLQuNGB0LAg0YDQtdCz0LjRgdGC0YDQsNGG0LjQuCDQuCDQstCw0LvQuNC00LDRhtC40Lgg0YLQvtC60LXQvdC+0LIiCgogICAgICAgICAgICAgICAgLT4gYXV0aF9BUElfZGIgItCf0L7Qu9GD0YfQsNC10YIg0LTQsNC90L3Ri9C1INC40Lcg0LfQsNC/0YDQvtGB0LAg0Lgg0YHQvtGF0YDQsNC90Y/QtdGCINC4INC/0L7Qu9GD0YfQsNC10YIg0LTQsNC90L3Ri9C1INC+INC70L7Qs9C40L3QtSDQuCDQv9Cw0YDQvtC70LUg0L/QvtC70YzQt9C+0LLQsNGC0LXQu9C1IiAiU1FML1RDUCIgCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHVzZXJzX0FQSSA9IGNvbnRhaW5lciAiQVBJINC/0L7Qu9GM0LfQvtCy0LDRgtC10LvQtdC5IiB7CiAgICAgICAgICAgICAgICB0YWdzICIiCiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJQeXRob24gRmFzdEFQSSIKCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAi0KDQtdCw0LvQuNC30YPQtdGCINGE0YPQvdC60YbQuNC+0L3QsNC70YzQvdC+0YHRgtGMINGB0LXRgNCy0LjRgdCwINC30LDQv9C40YHQuCDQuCDQv9C+0LvRg9GH0LXQvdC40Y8g0LjQvdGE0L7RgNC80LDRhtC40Lgg0L4g0L/QvtC70YzQt9C+0LLQsNGC0LXQu9GP0YUiCiAgICAgICAgICAgIAogICAgICAgICAgICAgICAgLT4gdXNlcnNfQVBJX2RiICLQn9C+0LvRg9GH0LDQtdGCINC00LDQvdC90YvQtSDQuNC3INC30LDQv9GA0L7RgdCwINC4INGB0L7RhdGA0LDQvdGP0LXRgiDQuCDQv9C+0LvRg9GH0LDQtdGCINC00LDQvdC90YvQtSDQviDQv9C+0LvRjNC30L7QstCw0YLQtdC70LUiCiAgICAgICAgICAgICAgICAtPiBhdXRoX0FQSSAi0JLQsNC70LjQtNC40YDRg9C10YIg0YLQvtC60LXQvSIgIkpTT04vSFRUUFMiCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGdlb19wb2ludHNfQVBJID0gY29udGFpbmVyICJBUEkg0LPQtdC+0LPRgNCw0YTQuNGH0LXRgdC60LjRhSDQutC+0L7RgNC00LjQvdCw0YIiIHsKICAgICAgICAgICAgICAgIHRhZ3MgIiIKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlB5dGhvbiBGYXN0QVBJIgoKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICLQoNC10LDQu9C40LfRg9C10YIg0YTRg9C90LrRhtC40L7QvdCw0LvRjNC90L7RgdGC0Ywg0YHQtdGA0LLQuNGB0LAg0LTQvtCx0LDQstC70LXQvdC40Y8sINGD0LTQsNC70LXQvdC40Y8g0Lgg0LfQsNC/0YDQvtGB0LAg0LTQsNC90L3Ri9GFINC+INCz0LXQvtCz0YDQsNGE0LjRh9C10YHQutC40YUg0LrQvtC+0LTQuNC90LDRgtCw0YUiCiAgICAgICAgICAgIAogICAgICAgICAgICAgICAgLT4gZ2VvX3BvaW50c19BUElfZGIgItCf0L7Qu9GD0YfQsNC10YIg0LTQsNC90L3Ri9C1INC40Lcg0LfQsNC/0YDQvtGB0LAg0Lgg0YHQvtGF0YDQsNC90Y/QtdGCINC4INC/0L7Qu9GD0YfQsNC10YIg0LTQsNC90L3Ri9C1INC+INGC0L7Rh9C60LUiCiAgICAgICAgICAgICAgICAtPiBhdXRoX0FQSSAi0JLQsNC70LjQtNC40YDRg9C10YIg0YLQvtC60LXQvSIgIkpTT04vSFRUUFMiCiAgICAgICAgICAgIH0gIAoKICAgICAgICAgICAgY29tcGFuaW9uX3NlYXJjaF9BUEkgPSBjb250YWluZXIgIkFQSSDQv9C+0LXQt9C00L7QuiIgewogICAgICAgICAgICAgICAgdGFncyAiIgogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUHl0aG9uIEZhc3RBUEkiCgogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gItCg0LXQsNC70LjQt9GD0LXRgiDRhNGD0L3QutGG0LjQvtC90LDQu9GM0L3QvtGB0YLRjCDRgdC10YDQstC40YHQsCDQv9C+INGB0L7Qt9C00LDQvdC40Y4g0LzQsNGA0YjRgNGD0YLQvtCyLCDQtNC+0LHQsNCy0LvQtdC90LjRjyDQsiDQvdC40YUg0YLQvtGH0LXQuiwg0YHQvtC30LTQsNC90LjQtSDQv9C+0LXQt9C00L7QuiDQuCDQtNC+0LHQsNCy0LvQtdC90LjRjyDQu9GO0LTQtdC5IgogICAgICAgICAgICAKICAgICAgICAgICAgICAgIC0+IGNvbXBhbmlvbl9zZWFyY2hfQVBJX2RiICLQn9C+0LvRg9GH0LDQtdGCINC00LDQvdC90YvQtSDQuNC3INC30LDQv9GA0L7RgdCwINC4INGB0L7RhdGA0LDQvdGP0LXRgiDQtNCw0L3QvdGL0LUg0L4g0L/QvtC10LfQtNC60LUsINC80LDRgNGI0YDRg9GC0LUiCiAgICAgICAgICAgICAgICAtPiBhdXRoX0FQSSAi0JLQsNC70LjQtNC40YDRg9C10YIg0YLQvtC60LXQvSIgIkpTT04vSFRUUFMiCiAgICAgICAgICAgICAgICAtPiB1c2Vyc19BUEkgItCX0LDQv9GA0LDRiNC40LLQsNC10YIg0LTQsNC90L3Ri9C1INC/0L7Qu9GM0LfQvtCy0LDRgtC10LvRjyIgIkpTT04vSFRUUFMiCiAgICAgICAgICAgICAgICAtPiBnZW9fcG9pbnRzX0FQSSAi0JfQsNC/0YDQsNGI0LjQstCw0LXRgiDQtNCw0L3QvdGL0LUg0LPQtdC+0LPRgNCw0YTQuNGH0LXRgdC60L7QuSDRgtC+0YfQutC4IiAiSlNPTi9IVFRQUyIKICAgICAgICAgICAgfSAKCiAgICAgICAgCiAgICAgICAgfQoKICAgICAgICBkcml2ZXIgLT4gY29tcGFuaW9uX3NlYXJjaCAi0KHQvtC30LTQsNC10YIg0LzQsNGA0YjRgNGD0YIg0Lgg0L/QvtC10LfQtNC60YMsINC80L7QttC10YIg0LTQvtCx0LDQstC40YLRjCDQsiDQvdC10LUg0L/QsNGB0YHQsNC20LjRgNC+0LIiCiAgICAgICAgZHJpdmVyIC0+IGNvbXBhbmlvbl9zZWFyY2guY29tcGFuaW9uX3NlYXJjaF9BUEkgItCf0L7Qu9GD0YfQsNC10YIg0YPRgdC70YPQs9C4INGB0LLRj9C30LDQvdC90YvQtSDRgSDRgdC+0LfQtNCw0L3QuNC10Lwg0L/QvtC10LfQutC+0LoiCgogICAgICAgIHBhc3NlbmdlciAtPiBjb21wYW5pb25fc2VhcmNoICLQlNC+0LHQsNCy0LvRj9C10YLRgdGPINCyINC/0L7QtdC30LTQutGDIgogICAgICAgIHBhc3NlbmdlciAtPiBjb21wYW5pb25fc2VhcmNoLmNvbXBhbmlvbl9zZWFyY2hfQVBJICLQn9C+0LvRg9GH0LDQtdGCINGD0YHQu9GD0LPRgyDQt9Cw0L/QuNGB0Lgg0LIg0L/QvtC10LfQtNC60YMiCgoKICAgICAgICAKICAgIH0KCiAgICB2aWV3cyB7CgogICAgICAgIHRoZW1lcyBkZWZhdWx0CgogICAgICAgIHN0eWxlcyB7CiAgICAgICAgICAgIGVsZW1lbnQgIkRhdGFiYXNlInsKICAgICAgICAgICAgICAgIHNoYXBlIEN5bGluZGVyCiAgICAgICAgICAgIH0KICAgICAgICB9CgogICAgICAgIHN5c3RlbUNvbnRleHQgY29tcGFuaW9uX3NlYXJjaCAiY29udGV4dF9jb21wIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvTGF5b3V0CiAgICAgICAgfQoKCiAgICAgICAgY29udGFpbmVyIGNvbXBhbmlvbl9zZWFyY2ggImMyIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvTGF5b3V0CiAgICAgICAgfQoKICAgICAgICAvLyBjb21wb25lbnQgY29tcGFuaW9uX3NlYXJjaC5jb21wX3NlYXJjaF9BUEkgImMzIiB7CiAgICAgICAgLy8gICAgIGluY2x1ZGUgKgogICAgICAgIC8vICAgICBleGNsdWRlICJyZWxhdGlvbnNoaXAudGFnPT1jMSIKICAgICAgICAvLyAgICAgYXV0b0xheW91dAogICAgICAgIC8vIH0KCiAgICB9CgogICAKfQ=="
+  },
+  "views" : {
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "c2",
+      "metadataSymbols" : "SquareBrackets",
+      "styles" : {
+        "elements" : [ {
+          "shape" : "Cylinder",
+          "tag" : "Database"
+        } ]
+      },
+      "terminology" : { },
+      "themes" : [ "https://static.structurizr.com/themes/default/theme.json" ]
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 3191,
+        "width" : 2698
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 635,
+        "y" : 165
+      }, {
+        "id" : "2",
+        "x" : 1385,
+        "y" : 165
+      }, {
+        "id" : "4",
+        "x" : 1277,
+        "y" : 1365
+      }, {
+        "id" : "5",
+        "x" : 969,
+        "y" : 2565
+      }, {
+        "id" : "6",
+        "x" : 2027,
+        "y" : 1965
+      }, {
+        "id" : "7",
+        "x" : 219,
+        "y" : 1965
+      }, {
+        "id" : "8",
+        "x" : 969,
+        "y" : 1965
+      }, {
+        "id" : "10",
+        "x" : 219,
+        "y" : 1365
+      }, {
+        "id" : "13",
+        "x" : 2027,
+        "y" : 1365
+      }, {
+        "id" : "16",
+        "x" : 1010,
+        "y" : 765
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "c2",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "11"
+      }, {
+        "id" : "12"
+      }, {
+        "id" : "14"
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "17"
+      }, {
+        "id" : "18",
+        "vertices" : [ {
+          "x" : 1127,
+          "y" : 1365
+        }, {
+          "x" : 1127,
+          "y" : 1665
+        } ]
+      }, {
+        "id" : "19"
+      }, {
+        "id" : "20"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "9"
+      } ],
+      "softwareSystemId" : "3"
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "context_comp",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "21"
+      }, {
+        "id" : "23"
+      } ],
+      "softwareSystemId" : "3"
+    } ]
+  }
+}
