@@ -17,8 +17,8 @@ services:
     networks:
       - app-network
 
-  web:
-    build: .
+  Auth_service:
+    build: .\Auth_service
     ports:
       - "8000:8000"
     environment:
