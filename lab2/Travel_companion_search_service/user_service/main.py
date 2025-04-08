@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 import httpx
 import os
 from typing import List
 from auth import validate_token
+from database import get_db, engine
+import userModal
 
 class UserInfo(BaseModel):
     username: str
@@ -20,17 +23,14 @@ class UserCreate(BaseModel):
 class UserResponse(UserInfo):
     id: int
 
-fake_users_db = []
-fake_db_id = 4
-
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8000")
+
+userModal.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 @app.post("/register")
-async def create_user(user: UserCreate):
-    global fake_db_id
-    user_id = 0
+async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     response = {}
     async with httpx.AsyncClient() as client:
         try:
@@ -38,7 +38,7 @@ async def create_user(user: UserCreate):
                 f"{AUTH_SERVICE_URL}/users/register",
                 json={"username": user.username, "password": user.password}
             )
-            print(auth_response.json())
+
             response = auth_response.json()
             if auth_response.status_code != 200:
                 detail = response['detail']
@@ -46,62 +46,68 @@ async def create_user(user: UserCreate):
                     status_code=auth_response.status_code,
                     detail=f'auth service response: {detail}',
                 )
-            print(user_id)
+
         except httpx.ConnectError:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Authorization service unavailable"
             )
 
-    new_user = {
-        "id": response['id'],
-        "username": user.username,
-        "email": user.email,
-        "full_name": user.full_name
-    }
-    fake_users_db.append(new_user)
-    fake_db_id += 1
-    
+    new_user = userModal.User(
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
     return new_user
 
 @app.get("/", response_model=List[UserResponse])
-async def get_all_users(_ = Depends(validate_token)):
-    return fake_users_db
+async def get_all_users(db: Session = Depends(get_db), _ = Depends(validate_token)):
+    return db.query(userModal.User).all()
 
 @app.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, _ = Depends(validate_token)):
+async def get_user(user_id: int, db: Session = Depends(get_db), _ = Depends(validate_token)):
     global fake_users_db
-    print(user_id, fake_users_db)
-    user = next((u for u in fake_users_db if u["id"] == user_id), None)
+
+    user = db.query(userModal.User).filter(userModal.User.id == user_id).first()
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@app.get("login/{login}", response_model=UserResponse)
-async def get_user_by_login(login: str, _ = Depends(validate_token)):
-    global fake_users_db
-    user = next((u for u in fake_users_db if u["username"] == login), None)
+@app.get("login/{login}",  response_model=UserResponse)
+async def get_user_by_login(login: str, db: Session = Depends(get_db), _ = Depends(validate_token)):
+    user = db.query(userModal.User).filter(userModal.User.username == login).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 @app.put("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user_info: UserInfo, _ = Depends(validate_token)):
-    user = next((u for u in fake_users_db if u["id"] == user_id), None)
+async def update_user(user_id: int, user_info: UserInfo, db: Session = Depends(get_db), _ = Depends(validate_token)):
+    user = db.query(userModal.User).filter(userModal.User.id == user_id).first()
     if not user:    
         raise HTTPException(status_code=404, detail="User not found")
     
-    user.update(user_info)
+    for field, value in user_info.dict().items():
+        setattr(user, field, value)
+    
+    db.commit()
+    db.refresh(user)
     return user
 
 @app.delete("/{user_id}")
-async def delete_user(user_id: int, _ = Depends(validate_token)):
-    global fake_users_db
+async def delete_user(user_id: int, db: Session = Depends(get_db), _ = Depends(validate_token)):
     
-    user = next((u for u in fake_users_db if u["id"] == user_id), None)
+    user = db.query(userModal.User).filter(userModal.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    fake_users_db = [u for u in fake_users_db if u["id"] != user_id]
-    
+    db.delete(user)
+    db.commit()
     return {"message": "User deleted successfully"}
+
+# @router.get("/get_user_by_mask", response_model=list[schemas.User])
+# def get_user_by_mask(mask: str = '', db: Session = Depends(get_db), _: userModal.User = Depends(get_current_user)):
+#     return db.query(userModal.User).filter(or_(userModal.User.name.ilike(f"%{mask}%"), userModal.User.lastname.ilike(f"%{mask}%"))).all()
