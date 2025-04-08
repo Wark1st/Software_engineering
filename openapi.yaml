@@ -1,0 +1,700 @@
+openapi: 3.0.0
+info:
+  title: Combined Travel API
+  version: 1.0.0
+  description: API для управления путешествиями, маршрутами и пользователями
+servers:
+  - url: http://localhost:8000
+    description: Auth Service
+  - url: http://localhost:8001
+    description: GeoPoints Service
+  - url: http://localhost:8003
+    description: Trips Service
+  - url: http://localhost:8004
+    description: User Service
+tags:
+  - name: auth
+    description: Аутентификация и авторизация
+  - name: users
+    description: Управление пользователями
+  - name: points
+    description: Географические точки
+  - name: routes
+    description: Маршруты
+  - name: trips
+    description: Поездки
+paths:
+  /users/register:
+    post:
+      tags:
+        - auth
+      summary: Register new user
+      description: Create a new user account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+            example:
+              username: johndoe
+              password: secret
+      responses:
+        "200":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Username already registered
+  /users/token:
+    post:
+      tags:
+        - auth
+      summary: Get access token
+      description: OAuth2 password flow authentication
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        "200":
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        "401":
+          description: Incorrect username or password
+  /users/me:
+    get:
+      tags:
+        - auth
+      summary: Get current user
+      description: Returns information about authenticated user
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+  /users/get_user:
+    get:
+      tags:
+        - auth
+      summary: Get user by login
+      description: Find user by username
+      parameters:
+        - name: login
+          in: query
+          required: true
+          schema:
+            type: string
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: User not found
+  /users/:
+    get:
+      tags:
+        - auth
+      summary: Get all users
+      description: Returns list of all registered users
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /points/:
+    get:
+      tags:
+        - points
+      summary: Get all points
+      description: Returns list of all geographical points
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PointResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "503":
+          description: Service unavailable
+  /points/get_points:
+    get:
+      tags:
+        - points
+      summary: Get points by IDs
+      description: Returns points for specified IDs
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          description: Array of point IDs
+          schema:
+            type: array
+            items:
+              type: integer
+            example:
+              - 1
+              - 2
+              - 3
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PointResponse"
+        "400":
+          description: One or more points not found
+        "401":
+          description: Unauthorized
+  /points/{id}:
+    get:
+      tags:
+        - points
+      summary: Get point by ID
+      description: Returns single point by ID
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of point to return
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointResponse"
+        "400":
+          description: Invalid ID supplied
+        "401":
+          description: Unauthorized
+        "404":
+          description: Point not found
+  /routes/create_route:
+    post:
+      tags:
+        - routes
+      summary: Create new route
+      description: Create a new route with geographical points
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteCreate"
+      responses:
+        "200":
+          description: Route created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteResponse"
+        "400":
+          description: Route name already exists
+      security:
+        - OAuth2PasswordBearer: []
+  /routes/:
+    get:
+      tags:
+        - routes
+      summary: Get all routes
+      description: Returns list of all routes
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RouteResponse"
+      security:
+        - OAuth2PasswordBearer: []
+  /routes/{route_id}:
+    get:
+      tags:
+        - routes
+      summary: Get route by ID
+      parameters:
+        - name: route_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteResponse"
+        "404":
+          description: Route not found
+      security:
+        - OAuth2PasswordBearer: []
+    delete:
+      tags:
+        - routes
+      summary: Delete route by ID
+      parameters:
+        - name: route_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Route deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteRouteResponse"
+        "404":
+          description: Route not found
+      security:
+        - OAuth2PasswordBearer: []
+  /trips/create:
+    post:
+      tags:
+        - trips
+      summary: Create new trip
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripCreate"
+      responses:
+        "200":
+          description: Trip created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripResponse"
+      security:
+        - OAuth2PasswordBearer: []
+  /trips/:
+    get:
+      tags:
+        - trips
+      summary: Get all trips
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TripResponse"
+      security:
+        - OAuth2PasswordBearer: []
+  /trips/{trip_id}:
+    get:
+      tags:
+        - trips
+      summary: Get trip by ID
+      parameters:
+        - name: trip_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripResponse"
+        "404":
+          description: Trip not found
+      security:
+        - OAuth2PasswordBearer: []
+    delete:
+      tags:
+        - trips
+      summary: Delete trip by ID
+      parameters:
+        - name: trip_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trip deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripDeleteResponse"
+        "403":
+          description: Permission denied
+        "404":
+          description: Trip not found
+      security:
+        - OAuth2PasswordBearer: []
+  /trips/user/{login}:
+    get:
+      tags:
+        - trips
+      summary: Get trips by user login
+      parameters:
+        - name: login
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TripResponse"
+      security:
+        - OAuth2PasswordBearer: []
+  /register:
+    post:
+      tags:
+        - users
+      summary: Register new user
+      description: Create a new user profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+            example:
+              username: johndoe
+              password: secret
+              email: john@example.com
+              full_name: John Doe
+      responses:
+        "200":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "503":
+          description: Authorization service unavailable
+  /:
+    get:
+      tags:
+        - users
+      summary: Get all users
+      description: Returns list of all registered users
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+  /{user_id}:
+    get:
+      tags:
+        - users
+      summary: Get user by ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: User not found
+    put:
+      tags:
+        - users
+      summary: Update user information
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInfo"
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: User not found
+    delete:
+      tags:
+        - users
+      summary: Delete user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "404":
+          description: User not found
+  /login/{login}:
+    get:
+      tags:
+        - users
+      summary: Get user by login
+      parameters:
+        - name: login
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - OAuth2PasswordBearer: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: User not found
+components:
+  schemas:
+    UserCreate:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+    PointResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        pointName:
+          type: string
+          example: Kaluga
+        px:
+          type: number
+          format: float
+          example: 54.5293
+        py:
+          type: number
+          format: float
+          example: 36.2754
+      required:
+        - id
+        - pointName
+        - px
+        - py
+    RouteCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        points:
+          type: array
+          items:
+            type: integer
+        description:
+          type: string
+      required:
+        - name
+        - points
+    RouteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeoPoint"
+    GeoPoint:
+      type: object
+      properties:
+        id:
+          type: integer
+        pointName:
+          type: string
+        px:
+          type: number
+        py:
+          type: number
+    DeleteRouteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        deleted_route:
+          $ref: "#/components/schemas/RouteResponse"
+    TripCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        users:
+          type: array
+          items:
+            type: integer
+        route:
+          type: integer
+    TripResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+        route:
+          $ref: "#/components/schemas/RouteResponse"
+        created_by:
+          type: integer
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        full_name:
+          type: string
+    TripDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        deleted_trip:
+          $ref: "#/components/schemas/TripResponse"
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        full_name:
+          type: string
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: http://localhost:8000/users/token
+          scopes: {}

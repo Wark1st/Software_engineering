@@ -17,8 +17,8 @@ services:
     networks:
       - app-network
 
-  Auth_service:
-    build: .\Auth_service
+  auth_service:
+    build: ./auth_service
     ports:
       - "8000:8000"
     environment:
@@ -29,6 +29,48 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app-network
+
+  geo_points_service:
+    build: ./geo_points_service
+    ports:
+      - "8001:8001"
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8000
+    depends_on: 
+      auth_service:
+        condition: service_started
+    networks:
+      - app-network
+
+  trips_service:
+    build: ./trips_service
+    ports:
+      - "8002:8002"
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8000
+      - GEO_POINTS_URL=http://geo_points_service:8001
+      - USER_SERVICE_URL=http://user_service:8003
+    depends_on: 
+      auth_service:
+        condition: service_started
+      geo_points_service:
+        condition: service_started
+      user_service:
+        condition: service_started
+    networks:
+      - app-network
+
+  user_service:
+    build: ./user_service
+    ports:
+      - "8003:8003"
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8000
+    depends_on: 
+      auth_service:
+        condition: service_started
     networks:
       - app-network
 

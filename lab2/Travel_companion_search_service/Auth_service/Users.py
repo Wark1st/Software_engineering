@@ -1,9 +1,26 @@
 from fastapi import Depends, HTTPException, status, APIRouter, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from database import get_db
-import userModal as userModal, auth, schemas
+import userModal as userModal, auth
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+
+
+class User(BaseModel):
+    id: int
+    username: str
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -23,8 +40,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.post("/register", response_model=schemas.User)
-def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=User)
+def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(userModal.User).filter(userModal.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
@@ -35,7 +52,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@router.post("/token", response_model=schemas.Token)
+@router.post("/token", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(userModal.User).filter(userModal.User.username == form_data.username).first()
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
@@ -47,11 +64,11 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me", response_model=User)
 async def read_users_me(current_user: userModal.User = Depends(get_current_user)):
     return current_user
 
-@router.get("/get_user", response_model=schemas.User)
+@router.get("/get_user", response_model=User)
 def get_user_by_login(login: str, db: Session = Depends(get_db), _: userModal.User = Depends(get_current_user)):
     db_user = db.query(userModal.User).filter(userModal.User.username == login).first()
     if not db_user:
@@ -59,7 +76,7 @@ def get_user_by_login(login: str, db: Session = Depends(get_db), _: userModal.Us
     
     return db_user
 
-@router.get("/", response_model=list[schemas.User])
+@router.get("/", response_model=list[User])
 def get_user_by_login(db: Session = Depends(get_db), _: userModal.User = Depends(get_current_user)):
     db_users = db.query(userModal.User).all()
     if not db_users:
