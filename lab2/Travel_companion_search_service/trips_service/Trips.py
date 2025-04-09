@@ -133,6 +133,41 @@ async def create_trip(
         "route": route
         }
 
+@router.get("/user/{login}", response_model=List[TripResponse])
+async def get_user_trips(
+    login: str,
+    cur_user: dict = Depends(validate_token)
+):
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"{USER_SERVICE_URL}/login/{login}",
+                params={"login": login},
+                headers={"Authorization": f"Bearer {cur_user['token']}"}
+            )
+            user_data = response.json()
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"User {login} not found"
+                )
+        except httpx.ConnectError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="User service unavailable"
+            )
+
+    user_id = user_data["id"]
+    
+    user_trips = []
+    for trip in fake_trips_db:
+        if user_id in trip["users"] or trip["created_by"] == user_id:
+            trip_info = await get_trip_info(trip["id"], cur_user)
+            user_trips.append(trip_info)
+    
+    return user_trips
+
 @router.get("/", response_model=List[TripResponse])
 async def get_all_trips(cur_user: dict = Depends(validate_token)):
     trips = []
@@ -192,38 +227,3 @@ async def add_users_to_trip(
             trip["users"].append(user["id"])
     
     return await get_trip_info(trip['id'], cur_user)
-
-@router.get("/user/{login}", response_model=List[TripResponse])
-async def get_user_trips(
-    login: str,
-    cur_user: dict = Depends(validate_token)
-):
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(
-                f"{USER_SERVICE_URL}/login/{login}",
-                params={"login": login},
-                headers={"Authorization": f"Bearer {cur_user['token']}"}
-            )
-            user_data = response.json()
-
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=response.status_code,
-                    detail=f"User {login} not found"
-                )
-        except httpx.ConnectError:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="User service unavailable"
-            )
-
-    user_id = user_data["id"]
-    
-    user_trips = []
-    for trip in fake_trips_db:
-        if user_id in trip["users"] or trip["created_by"] == user_id:
-            trip_info = await get_trip_info(trip["id"], cur_user)
-            user_trips.append(trip_info)
-    
-    return user_trips
