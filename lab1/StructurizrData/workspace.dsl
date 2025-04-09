@@ -196,9 +196,16 @@ workspace {
                 technology "Docker Engine"
                 description "Основной хост приложений"
 
-                deploymentNode "Database Node" {
+                deploymentNode "Database Auth" {
                     technology "Postgres 13-alpine"
                     containerInstance companion_search.auth_API_db {
+                        
+                    }
+                }
+
+                deploymentNode "Database Users" {
+                    technology "Postgres 13-alpine"
+                    containerInstance companion_search.users_API_db {
                         
                     }
                 }
@@ -233,6 +240,7 @@ workspace {
                     }
 
                     companion_search.auth_API -> companion_search.auth_API_db "SQL"
+                    companion_search.auth_API -> companion_search.users_API_db "SQL"
                     companion_search.geo_points_API -> companion_search.auth_API "HTTP"
                     companion_search.users_API -> companion_search.auth_API "HTTP"
                     companion_search.companion_search_API -> companion_search.auth_API "HTTP"
