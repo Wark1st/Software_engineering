@@ -53,6 +53,20 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    links:
+      - geopoints_db
+
+  geopoints_db:
+    image: mongo:latest
+    hostname: geopoints_mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=geopoints_db
+      - MONGO_INITDB_ROOT_USERNAME=practical-proj
+      - MONGO_INITDB_ROOT_PASSWORD=1
+    ports:
+      - 27017:27017
+    networks:
+      - app-network 
 
   geo_points_service:
     build: ./geo_points_service
@@ -60,6 +74,7 @@ services:
       - "8001:8001"
     environment:
       - AUTH_SERVICE_URL=http://auth_service:8000
+      - DATABASE_URL=mongodb://practical-proj:1@geopoints_mongodb:27017/?authSource=admin
     depends_on: 
       auth_service:
         condition: service_started
