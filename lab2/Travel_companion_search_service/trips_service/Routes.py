@@ -1,40 +1,14 @@
 import os
 from typing import List
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter, Request
 import httpx
-from pydantic import BaseModel
 from auth import validate_token
 from fastapi import APIRouter, status
+from schemasRoutes import DeleteRouteResponse, RouteCreate, RouteResponse
+from bson.errors import InvalidId
+from bson import ObjectId
 
-class RouteCreate(BaseModel):
-    name: str
-    points: list[int]
-    description: str = ''
-
-class GeoPoint(BaseModel):
-    id: int
-    pointName: str
-    px: float
-    py: float 
-
-class RouteCreate(BaseModel):
-    name: str
-    points: List[int]
-    description: str = ''
-
-class RouteResponse(RouteCreate):
-    id: int
-    points: List[GeoPoint]
-
-class DeleteRouteResponse(BaseModel):
-    message: str
-    deleted_route: RouteResponse
-
-fake_route_db: RouteCreate = [
-    {"id": 1, "name": "Название 1", "description": 'Описание маршрута 1', "points": [1, 2]},
-    {"id": 2, "name": "Название 2", "description": 'Описание маршрута 2', "points": [3, 2, 4]},
-    {"id": 3, "name": "Название 3", "description": 'Описание маршрута 3', "points": [3, 4, 1]}
-]
+ROUTES = 'routes'
 
 fake_db_id_generate = 4
 
@@ -68,56 +42,90 @@ async def get_geo_points(ids, cur_user):
 
 
 @router.post('/create_route', response_model=RouteResponse)
-async def create_new_route(route: RouteCreate, cur_user = Depends(validate_token)):
-    global fake_db_id_generate
-    db_route = list(filter(lambda p: p["name"] == route.name, fake_route_db))
-    if db_route:
+async def create_new_route(route: RouteCreate, request: Request, cur_user = Depends(validate_token)):
+    collection = request.app.mongodb[ROUTES]
+    if await collection.find_one({"name": route.name}):
         raise HTTPException(status_code=400, detail="Route with this name already registered")
     
     points = await get_geo_points(route.points, cur_user)
     
-    fake_route_db.append({'id': fake_db_id_generate, 'name': route.name, 'description': route.description, 'points': route.points})
-    fake_db_id_generate += 1
+    result = await collection.insert_one({
+        "name": route.name,
+        "description": route.description,
+        "points": route.points
+    })
 
-    return {'id': fake_db_id_generate - 1, 'name': route.name, 'description': route.description, 'points': points}
+    db_route = await collection.find_one({"_id": result.inserted_id})
 
-@router.get('/', response_model=List[RouteResponse])
-async def get_all_routes(cur_user: dict = Depends(validate_token)):
-    response = []
-    for route in fake_route_db:
-        points = await get_geo_points(route['points'], cur_user)
-        response.append({**route, 'points': points})
-    return response
+    return RouteResponse(
+        id=str(db_route["_id"]),
+        name=db_route["name"],
+        description=db_route["description"],
+        points=points
+    )
 
+@router.get('/')
+async def get_all_routes(request: Request, cur_user: dict = Depends(validate_token)):
+    collection = request.app.mongodb[ROUTES]
+    routes = []
+    async for route in collection.find():
+        points = await get_geo_points(route["points"], cur_user)
+        routes.append(RouteResponse(
+            id=str(route["_id"]),
+            name=route["name"],
+            description=route["description"],
+            points=points
+        ))
+    return routes
 
 @router.get('/{route_id}', response_model=RouteResponse)
-async def get_route_by_id(route_id: int, cur_user: dict = Depends(validate_token)):
-    route = next((r for r in fake_route_db if r["id"] == route_id), None)
-    if not route:
+async def get_route_by_id(route_id: str, request: Request, cur_user: dict = Depends(validate_token)):
+    try:
+        obj_id = ObjectId(route_id)
+    except InvalidId:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Route not found"
-        )
-    points = await get_geo_points(route['points'], cur_user)
-    return {**route, 'points': points}
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Invalid route ID format"
+            )
+    
+    collection = request.app.mongodb[ROUTES]
+    db_route = await collection.find_one({"_id": obj_id})
+    if not db_route:
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Route not found"
+            )
+
+    points = await get_geo_points(db_route['points'], cur_user)
+    return RouteResponse(
+        id=str(db_route["_id"]),
+        name=db_route["name"],
+        description=db_route["description"],
+        points=points
+    )
 
 
 @router.delete('/{route_id}', response_model=DeleteRouteResponse)
-async def delete_route(route_id: int, _: dict = Depends(validate_token)):
-    global fake_route_db
+async def delete_route(route_id: str, request: Request,  _: dict = Depends(validate_token)):
+    try:
+        obj_id = ObjectId(route_id)
+    except InvalidId:
+        raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Invalid route ID format"
+            )
     
-    index = next((i for i, r in enumerate(fake_route_db) if r["id"] == route_id), None)
+    collection = request.app.mongodb[ROUTES]
     
-    if index is None:
+    db_route = await collection.find_one_and_delete({"_id": obj_id})
+    
+    if not db_route:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Route not found"
         )
-
-    deleted_route = fake_route_db.pop(index)
     
     return {
         "message": "Route deleted successfully",
-        "deleted_route": deleted_route
     }
 

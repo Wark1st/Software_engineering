@@ -38,6 +38,30 @@ services:
       retries: 5
     networks:
       - app-network
+    
+  geopoints_db:
+    image: mongo:latest
+    hostname: geopoints_mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=geopoints_db
+      - MONGO_INITDB_ROOT_USERNAME=practical-proj
+      - MONGO_INITDB_ROOT_PASSWORD=1
+    ports:
+      - 27017:27017
+    networks:
+      - app-network
+
+  trips_db:
+    image: mongo:latest
+    hostname: trips_mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=trips_db
+      - MONGO_INITDB_ROOT_USERNAME=practical-proj
+      - MONGO_INITDB_ROOT_PASSWORD=1
+    ports:
+      - 27018:27017
+    networks:
+      - app-network 
 
   auth_service:
     build: ./auth_service
@@ -55,18 +79,6 @@ services:
       - app-network
     links:
       - geopoints_db
-
-  geopoints_db:
-    image: mongo:latest
-    hostname: geopoints_mongodb
-    environment:
-      - MONGO_INITDB_DATABASE=geopoints_db
-      - MONGO_INITDB_ROOT_USERNAME=practical-proj
-      - MONGO_INITDB_ROOT_PASSWORD=1
-    ports:
-      - 27017:27017
-    networks:
-      - app-network 
 
   geo_points_service:
     build: ./geo_points_service
@@ -89,6 +101,7 @@ services:
       - AUTH_SERVICE_URL=http://auth_service:8000
       - GEO_POINTS_URL=http://geo_points_service:8001
       - USER_SERVICE_URL=http://user_service:8003
+      - DATABASE_URL=mongodb://practical-proj:1@trips_mongodb:27017/trips_db?authSource=admin
     depends_on: 
       auth_service:
         condition: service_started
@@ -98,6 +111,8 @@ services:
         condition: service_started
     networks:
       - app-network
+    links:
+      - trips_db
 
   user_service:
     build: ./user_service
