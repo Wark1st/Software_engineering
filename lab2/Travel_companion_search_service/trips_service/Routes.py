@@ -1,3 +1,4 @@
+import json
 import os
 from typing import List
 from fastapi import Depends, HTTPException, APIRouter, Request
@@ -57,12 +58,20 @@ async def create_new_route(route: RouteCreate, request: Request, cur_user = Depe
 
     db_route = await collection.find_one({"_id": result.inserted_id})
 
-    return RouteResponse(
+    route_response = RouteResponse(
         id=str(db_route["_id"]),
         name=db_route["name"],
         description=db_route["description"],
         points=points
     )
+    
+    await request.app.redis.setex(
+        f"route:{route_response.id}", 
+        600,
+        json.dumps(route_response.model_dump())
+    )
+    
+    return route_response
 
 @router.get('/')
 async def get_all_routes(request: Request, cur_user: dict = Depends(validate_token)):
@@ -87,6 +96,9 @@ async def get_route_by_id(route_id: str, request: Request, cur_user: dict = Depe
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail="Invalid route ID format"
             )
+    cached_data = await request.app.redis.get(f"route:{route_id}")
+    if cached_data:
+        return json.loads(cached_data)
     
     collection = request.app.mongodb[ROUTES]
     db_route = await collection.find_one({"_id": obj_id})
@@ -97,12 +109,20 @@ async def get_route_by_id(route_id: str, request: Request, cur_user: dict = Depe
             )
 
     points = await get_geo_points(db_route['points'], cur_user)
-    return RouteResponse(
+    route_response = RouteResponse(
         id=str(db_route["_id"]),
         name=db_route["name"],
         description=db_route["description"],
         points=points
     )
+
+    await request.app.redis.setex(
+        f"route:{route_id}", 
+        600,
+        json.dumps(route_response.dict())
+    )
+    
+    return route_response
 
 
 @router.delete('/{route_id}', response_model=DeleteRouteResponse)
@@ -124,6 +144,8 @@ async def delete_route(route_id: str, request: Request,  _: dict = Depends(valid
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Route not found"
         )
+
+    await request.app.redis.delete(f"route:{route_id}")
     
     return {
         "message": "Route deleted successfully",

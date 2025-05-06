@@ -63,6 +63,13 @@ services:
     networks:
       - app-network 
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
   auth_service:
     build: ./auth_service
     ports:
@@ -108,6 +115,8 @@ services:
       geo_points_service:
         condition: service_started
       user_service:
+        condition: service_started
+      redis:
         condition: service_started
     networks:
       - app-network

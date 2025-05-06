@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from Routes import router as routeRouter
 from Trips import router as tripRouter
 from motor.motor_asyncio import AsyncIOMotorClient
+import aioredis
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 ROUTES = 'routes'
@@ -17,6 +18,7 @@ initial_data = [
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.mongodb_client = AsyncIOMotorClient(DATABASE_URL)
+    app.redis = await aioredis.from_url("redis://redis:6379", encoding="utf-8", decode_responses=True)
     app.mongodb = app.mongodb_client['trips_db']
     collection = app.mongodb[ROUTES]
     
@@ -35,6 +37,7 @@ async def lifespan(app: FastAPI):
     yield
     
     app.mongodb_client.close()
+    await app.redis.close()
 
 
 app = FastAPI(lifespan=lifespan)

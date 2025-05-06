@@ -18,6 +18,6 @@ COPY . .
 
 EXPOSE 8003
 
-RUN chmod +x /app/scripts/wait-for-db.sh
+# RUN chmod +x /app/scripts/wait-for-db.sh
 
-CMD ["sh", "-c", "/app/scripts/wait-for-db.sh alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8003"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8003"]
