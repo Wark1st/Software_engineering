@@ -12,9 +12,16 @@ workspace {
             
             companion_search_API_db = container "База данных API поездок" {
                 tags "Database"
-                technology "NoSQL Database"
+                technology "MongoDB"
 
                 description "Хранит схему данных маршрутов, поездок, точек в марщруте и пользователей в поездке"
+            }
+
+            companion_search_API_cash = container "Кэш данных API поездок" {
+                tags "Database"
+                technology "Redis"
+
+                description "Временно хранит информацию о часто используемых маршрутах"
             }
 
             auth_API_db = container "База данных API аутентификации" {
@@ -26,7 +33,7 @@ workspace {
 
             geo_points_API_db = container "База данных API географических координат" {
                 tags "Database"
-                technology "NoSQL Database"
+                technology "MongoDB"
 
                 description "Хранит схему данных географических координат"
             }
@@ -157,6 +164,13 @@ workspace {
                     -> companion_search_API_db "читает и сохраняет" 
                 }
 
+                cash_controller = component "Контроллер кэша" {
+                    technology "Redis"
+
+                    description "Проверяет данные в кэше и получает их"
+                    -> companion_search_API_cash "Проверяет, получает и обновляет данные"
+                }
+
                 auth_controller = component "Контроллер авторизации" {
                     
                     technology "Python"
@@ -174,6 +188,7 @@ workspace {
                     -> database_controller "ROUTE_INFO"
                     -> auth_controller "Регистрирует/валидирует токен" "JSON/HTTPS"
                     -> geo_points_API "Валидирует точки и запрашивает о них информацию" "JSON/HTTPS"
+                    -> cash_controller "Проверяет закешированы ли необходимые данные"
                 }
 
                 trips_controller = component "Контроллер поездок"{
@@ -206,6 +221,27 @@ workspace {
                 deploymentNode "Database Users" {
                     technology "Postgres 13-alpine"
                     containerInstance companion_search.users_API_db {
+                        
+                    }
+                }
+
+                deploymentNode "Database GeoPoints" {
+                    technology "Mongo"
+                    containerInstance companion_search.geo_points_API_db {
+                        
+                    }
+                }
+
+                deploymentNode "Database Trips" {
+                    technology "Mongo"
+                    containerInstance companion_search.companion_search_API_db {
+                        
+                    }
+                }
+
+                deploymentNode "Trips cash" {
+                    technology "Redis"
+                    containerInstance companion_search.companion_search_API_cash {
                         
                     }
                 }
